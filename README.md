@@ -1,7 +1,7 @@
-The following are the 3 bullet points which describe my method of processing the dataset:
-* I used the GitHub API to fetch user data and their repositories. Parsed the JSON response, processed it with Python, then saved the results in a CSV format using Pandas. Cleaned up missing values and converted booleans to lower case.
-* The most interesting fact I discovered after analyzing the data is that on average Fluent repositories have the highest number of stars compared to all other languages. This is very surprising considering that Fluent has very limited use cases.
-* Analysis of the data reveals that on and average, hireable people were following 46.136 more people as compared to non-hireable people. Thus, this creates a clear incentive for software engineers to collaborate with more number of people to enhance their skills and thereby make them more hireable.
+***The following are the 3 bullet points which describe my method of processing the dataset:***
+* ***I used the GitHub API to fetch user data and their repositories. Parsed the JSON response, processed it with Python, then saved the results in a CSV format using Pandas. Cleaned up missing values and converted booleans to lower case.***
+* ***The most interesting fact I discovered after analyzing the data is that on average Fluent repositories have the highest number of stars compared to all other languages. This is very surprising considering that Fluent has very limited use cases.***
+* ***Analysis of the data reveals that on and average, hireable people were following 46.136 more people as compared to non-hireable people. Thus, this creates a clear incentive for software engineers to collaborate with more number of people to enhance their skills and thereby make them more hireable.***
 
 I am including all the snippets of code that I used for scraping as well as analysis of the data for your kind perusal.
 **Scraping of data obtained from https://api.gitgub.com/{username}**
