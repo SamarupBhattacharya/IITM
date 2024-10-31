@@ -4,7 +4,8 @@
 * ***Analysis of the data reveals that on and average, hireable people were following 46.136 more people as compared to non-hireable people. Thus, this creates a clear incentive for software engineers to collaborate with more number of people to enhance their skills and thereby make them more hireable.***
 
 I am including all the snippets of code that I used for scraping as well as analysis of the data for your kind perusal.
-**Scraping of data obtained from https://api.gitgub.com/{username}**
+
+# Scraping of data obtained from https://api.gitgub.com/{username}
 import requests
 
 import pandas as pd
