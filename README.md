@@ -11,15 +11,15 @@ import pandas as pd
 
 import json
 
-**#GitHub API token**
+***#GitHub API token***
 
 GITHUB_TOKEN = '********************************************************************************'
 
-# GitHub API endpoint for searching users
+***# GitHub API endpoint for searching users***
 
 url = 'https://api.github.com/search/users'
 
-# Parameters for the search query
+***# Parameters for the search query***
 
 params = {
 
@@ -30,15 +30,15 @@ params = {
     'access_token': GITHUB_TOKEN
 }
 
-# Adding the Authorization
+***# Adding the Authorization***
 
 headers = { 'Authorization': f'token {GITHUB_TOKEN}' }
 
-# List to store user data
+***# List to store user data***
 
 users = []
 
-# Pagination to handle more than 100 results
+***# Pagination to handle more than 100 results***
 
 page = 1
 
@@ -70,7 +70,7 @@ while True:
         
 print(users)
 
-# Function to get user details
+***# Function to get user details***
 
 def get_user_details(username):
 
@@ -80,7 +80,7 @@ def get_user_details(username):
      
      user_data = response.json()
      
-     # Process company name
+***# Process company name***
      
      company = user_data.get('company', 'N/A')
      
@@ -90,7 +90,7 @@ def get_user_details(username):
         
      return { "login": user_data.get('login', 'N/A'), "name": user_data.get('name', 'N/A'), "company": company, "location": user_data.get('location', 'N/A'), "email": user_data.get('email', 'N/A'), "hireable": user_data.get('hireable', 'N/A'), "bio": user_data.get('bio', 'N/A'), "public_repos": user_data.get('public_repos', 'N/A'), "followers": user_data.get('followers', 'N/A'), "following": user_data.get('following', 'N/A'), "created_at": user_data.get('created_at', 'N/A') }
      
-# Fetching details for each user
+***# Fetching details for each user***
 
 detailed_users = [get_user_details(user) for user in users]
 
@@ -98,15 +98,15 @@ print(1)
 
 import csv
 
- # now we will open a file for writing
+ ***# now we will open a file for writing***
  
 data_file = open('users.csv', 'w')
 
-# create the csv writer object
+***# create the csv writer object***
 
 csv_writer = csv.writer(data_file)
 
-# Counter variable used for writing headers to the CSV file
+***# Counter variable used for writing headers to the CSV file***
 
 count = 0
 
@@ -124,7 +124,7 @@ for emp in detailed_users:
         
         count += 1
         
-**# Writing data of CSV file**
+***# Writing data of CSV file***
     
     csv_writer.writerow(emp.values())
     
@@ -136,7 +136,7 @@ print(2)
 
 import pandas as pd
 
-# Load CSV file
+***# Load CSV file***
 
 df = pd.read_csv('users (2).csv')
 
@@ -154,7 +154,7 @@ def convert_hireable(value):
   
 df['hireable'] = df['hireable'].apply(convert_hireable)
 
-# Save the updated DataFrame back to the CSV file
+***# Save the updated DataFrame back to the CSV file***
 
 df.to_csv('users (2).csv', index=False)
 
@@ -164,19 +164,19 @@ import requests
 
 import pandas as pd
 
-# GitHub API URL
+***# GitHub API URL***
 
 GITHUB_API_URL = "https://api.github.com/users/{}/repos"
 
-# Read the users from the CSV file
+***# Read the users from the CSV file***
 
 users_df = pd.read_csv("users.csv")
 
-# Initialize an empty list to store repository data
+***# Initialize an empty list to store repository data***
 
 repos_data = []
 
-# Loop through each user and fetch their repositories
+***# Loop through each user and fetch their repositories***
 
 for index, row in users_df.iterrows():
 
@@ -205,11 +205,11 @@ for index, row in users_df.iterrows():
             'license_name': repo['license']['name'] if repo['license'] is not None and repo['license']['name'] else ''
         })
 
-# Create a DataFrame from the repository data
+***# Create a DataFrame from the repository data***
 
 repos_df = pd.DataFrame(repos_data)
 
-# Save the DataFrame to a CSV file
+***# Save the DataFrame to a CSV file***
 
 repos_df.to_csv("repositories.csv", index=False)
 
