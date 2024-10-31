@@ -159,7 +159,7 @@ df['hireable'] = df['hireable'].apply(convert_hireable)
 
 df.to_csv('users (2).csv', index=False)
 
-**Scraping the data obtained from https://api.github.com/{username}/repos**
+# Scraping the data obtained from https://api.github.com/{username}/repos
 
 import requests
 
@@ -214,7 +214,7 @@ repos_df = pd.DataFrame(repos_data)
 
 repos_df.to_csv("repositories.csv", index=False)
 
-**Code for Q1**
+# Code for Q1
 
 sorted_df = df.sort_values(by='followers', ascending=False)
 
@@ -222,7 +222,7 @@ top_5 = sorted_df.head(5)
 
 print(','.join(top_5['login'].tolist()))
 
-**Code for Q2**
+# Code for Q2
 
 import pandas as pd
 
@@ -234,7 +234,7 @@ top_5 = sorted_df.head(5)
 
 print(','.join(top_5['login'].tolist()))
 
-**Code for Q3**
+# Code for Q3
 
 import pandas as pd
 
@@ -250,13 +250,13 @@ top_3_licenses_str = ','.join(top_3_licenses)
 
 print(top_3_licenses_str)
 
-**Code for  Q4**
+# Code for  Q4
 
 most_frequent_company = df['company'].mode()[0]
 
 print(f'The most frequent company is: {most_frequent_company}')
 
-**Code for Q5**
+# Code for Q5
 
 import pandas as pd
 
@@ -270,7 +270,7 @@ most_popular_language = language_counts.idxmax()
 
 print(f'The most popular programming language is: {most_popular_language}')
 
-**Code for Q6**
+# Code for Q6
 
 import pandas as pd
 
@@ -292,7 +292,7 @@ second_most_popular_language = language_counts.index[1]
 
 print(f'The second most popular programming language is: {second_most_popular_language}')
 
-**Code for Q7**
+# Code for Q7
 
 import pandas as pd
 
@@ -308,7 +308,7 @@ highest_average_stars = average_stars.max()
 
 print(f'The language with the highest average number of stars per repository is: {most_popular_language} with an average of {highest_average_stars:.2f} stars.')
 
-**Code for 8**
+# Code for 8
 
 df = pd.read_csv('users.csv')
 
@@ -324,13 +324,13 @@ top_5_logins = ','.join(top_5['login'].tolist())
 
 print(top_5_logins)
 
-**Code for Q9**
+# Code for Q9
 
 correlation = df['followers'].corr(df['public_repos'])
 
 print(f'The correlation between the number of followers and the number of public repositories is: {correlation:.3f}')
 
-**Code for Q10**
+# Code for Q10
 
 from sklearn.linear_model import LinearRegression
 
@@ -346,7 +346,7 @@ coef = model.coef_[0]
 
 print(f'Estimated additional followers per additional public repository: {coef:.3f}')
 
-**Code for Q11**
+# Code for Q11
 
 import pandas as pd
 
@@ -356,7 +356,7 @@ correlation = repos_df['has_projects'].astype(int).corr(repos_df['has_wiki'].ast
 
 print(f'The correlation between having projects enabled and having a wiki enabled is: {correlation:.3f}')
 
-**Code for Q12**
+# Code for Q12
 
 avg_following_hireable = df[df['hireable'] == True]['following'].mean()
 
@@ -364,7 +364,7 @@ avg_following_non_hireable = df[df['hireable'].isnull()]['following'].mean()
 
 print(f'DIfference of average followers: {(avg_following_hireable-avg_following_non_hireable):.3f}')
 
-**Code for Q13**
+# Code for Q13
 
 from sklearn.linear_model import LinearRegression
 
@@ -384,7 +384,7 @@ slope = model.coef_[0]
 
 print(f'Regression slope: {slope:.3f}')
 
-**Code for Q14**
+# Code for Q14
 
 import pandas as pd
 
@@ -405,5 +405,5 @@ top_5_weekend_creators_str = ','.join(top_5_weekend_creators)
 print(top_5_weekend_creators_str)
 
 
-Thanks
+***Thanks***
 
