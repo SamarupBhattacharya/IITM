@@ -5,7 +5,7 @@ The following are the 3 bullet points which describe my method of processing the
 
 I am including all the snippets of code that I used for scraping as well as analysis of the data for your kind perusal.
 **Scraping of data obtained from https://api.gitgub.com/{username}**
-import requests
+import requests\n
 import pandas as pd
 import json
 **#GitHub API token**
