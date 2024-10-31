@@ -1,3 +1,4 @@
+# Hi,
 ***The following are the 3 bullet points which describe my method of processing the dataset:***
 * ***I used the GitHub API to fetch user data and their repositories. Parsed the JSON response, processed it with Python, then saved the results in a CSV format using Pandas. Cleaned up missing values and converted booleans to lower case.***
 * ***The most interesting fact I discovered after analyzing the data is that on average Fluent repositories have the highest number of stars compared to all other languages. This is very surprising considering that Fluent has very limited use cases.***
