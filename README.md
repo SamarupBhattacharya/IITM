@@ -41,9 +41,9 @@ users = []
 
 ***# Pagination to handle more than 100 results***
 
-page = 1
+  page = 1
 
-while True:
+  while True:
 
     response = requests.get(url, params={**params, 'page': page}, headers=headers)
     
