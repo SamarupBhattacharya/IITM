@@ -301,7 +301,7 @@ async def get_gpt4o_mini_response(prompt_messages: list[dict]) -> str:
 
 
 # --- API Endpoint ---
-@app.post("/api/", response_model=APIResponse)
+@app.post("/", response_model=APIResponse)
 async def ask_question(request_data: QueryRequest):
     if course_embeddings is None:
         raise HTTPException(status_code=503, detail="Knowledge base is not loaded. Please check server logs for details during startup.")
