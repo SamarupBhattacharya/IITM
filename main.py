@@ -16,8 +16,8 @@ import traceback # Import for full traceback in logging
 # as Vercel natively provides these and for local dev you'd set them in your shell
 # or use a dedicated local setup without python-dotenv for this version.)
 # It's assumed OPENAI_API_KEY and GOOGLE_API_KEY will be set in Vercel's dashboard.
-OPENAI_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6IjIzZjIwMDI1NjJAZHMuc3R1ZHkuaWl0bS5hYy5pbiJ9.HiA-2wYn10sdkdq2XqiTAGwNctdEH0rt8nar8zawFyc"
-GOOGLE_API_KEY = "AIzaSyDqHqkYWWr_VlNmsL-SYK4wKl4tPElJmhw"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # --- Configuration ---
 EMBEDDING_MODEL = "text-embedding-3-small"
