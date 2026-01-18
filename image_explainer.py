@@ -12,7 +12,7 @@ OUTPUT_FILENAME = "processed_posts_with_explanations.json"
 # IMPORTANT: As per instructions, leave API_KEY as an empty string.
 # The Canvas environment will automatically provide it at runtime.
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-API_KEY = "AIzaSyDqHqkYWWr_VlNmsL-SYK4wKl4tPElJmhw" 
+API_KEY = GEMINI_API_KEY 
 
 # --- Helper Functions ---
 
