@@ -2,19 +2,13 @@ import requests
 import json
 import base64
 import time
-from datetime import datetime # Though not directly used in this specific script, kept for consistency
+from datetime import datetime
 
-# --- Configuration ---
 INPUT_FILENAME = "processed_posts.json"
 OUTPUT_FILENAME = "processed_posts_with_explanations.json"
 
-# Gemini API configuration
-# IMPORTANT: As per instructions, leave API_KEY as an empty string.
-# The Canvas environment will automatically provide it at runtime.
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 API_KEY = GEMINI_API_KEY 
-
-# --- Helper Functions ---
 
 def get_mime_type(url_content_type):
     """
@@ -27,7 +21,6 @@ def get_mime_type(url_content_type):
         return 'image/png'
     elif 'image/webp' in url_content_type:
         return 'image/webp'
-    # Return None if the MIME type is not explicitly supported or recognized
     return None
 
 def explain_image_with_gemini(base64_image_data, mime_type, prompt_text="Explain and caption this image in detail."):
@@ -64,7 +57,6 @@ def explain_image_with_gemini(base64_image_data, mime_type, prompt_text="Explain
     }
 
     try:
-        # Construct the API URL with the dynamically provided API_KEY
         api_call_url = f"{GEMINI_API_URL}?key={API_KEY}"
         
         response = requests.post(api_call_url, headers=headers, json=payload, timeout=60)
@@ -72,12 +64,10 @@ def explain_image_with_gemini(base64_image_data, mime_type, prompt_text="Explain
         
         result = response.json()
 
-        # Navigate through the JSON response to extract the text explanation
         if result.get('candidates') and result['candidates'][0].get('content') and \
            result['candidates'][0]['content'].get('parts') and result['candidates'][0]['content']['parts'][0].get('text'):
             return result['candidates'][0]['content']['parts'][0]['text']
         else:
-            # If the expected structure is not found, return a detailed error
             return f"Error: Unexpected Gemini API response structure. Raw response: {json.dumps(result, indent=2)}"
     except requests.exceptions.Timeout:
         return "Error: Gemini API request timed out."
@@ -105,51 +95,38 @@ def process_image_urls_in_posts(posts_data):
     """
     processed_posts_data = []
     total_image_urls_processed = 0
-    
-    # Iterate through the outer list (list of post lists)
+
     for list_index, post_list in enumerate(posts_data):
         processed_inner_list = []
-        # Iterate through the inner list (list of individual post JSONs)
         for post_index, post_json in enumerate(post_list):
-            
-            # Check if 'image_url' field exists and is a list
+
             if 'image_url' in post_json and isinstance(post_json['image_url'], list):
                 original_image_urls = post_json['image_url']
                 new_image_explanations = [] # List to store explanations for this post
 
-                # Iterate through each image URL in the 'image_url' list
                 for url_index, img_url in enumerate(original_image_urls):
                     print(f"--- Processing Image {url_index + 1} for Post {post_index + 1} in Batch {list_index + 1} ---")
                     print(f"Attempting to access: {img_url}")
                     explanation_or_error = "" # Default value if processing fails
                     
                     try:
-                        # Attempt to download the image content
-                        # Set a reasonable timeout for network requests
                         img_response = requests.get(img_url, timeout=30)
                         img_response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
-
-                        # Get Content-Type from headers to determine MIME type
                         content_type = img_response.headers.get('Content-Type', '')
                         mime_type = get_mime_type(content_type)
-                        
-                        # Check for supported MIME type
+
                         if not mime_type:
                             explanation_or_error = f"Image URL '{img_url}' has an unsupported MIME type ('{content_type}'). Skipping explanation."
                             print(explanation_or_error)
-                        # Check image size against Gemini's 7MB limit
                         elif img_response.content and len(img_response.content) <= (7 * 1024 * 1024):
-                            # Base64 encode the image content
                             base64_encoded_image = base64.b64encode(img_response.content).decode('utf-8')
                             print(f"  Image successfully downloaded and Base64 encoded. Size: {len(img_response.content) / (1024*1024):.2f} MB")
-                            
-                            # Send to Gemini for explanation
+
                             print(f"  Sending image to GenAI-2.0-Flash for explanation...")
                             explanation_or_error = explain_image_with_gemini(base64_encoded_image, mime_type)
                             print(f"  Explanation (first 100 chars): {explanation_or_error[:100]}...") # Print a snippet
                             total_image_urls_processed += 1
                         else:
-                            # Handle images that are too large or have no content
                             size_mb = len(img_response.content) / (1024*1024) if img_response.content else 0
                             explanation_or_error = f"Image URL '{img_url}' is too large ({size_mb:.2f}MB > 7MB limit) or has no content. Skipping explanation."
                             print(explanation_or_error)
@@ -165,9 +142,8 @@ def process_image_urls_in_posts(posts_data):
                         print(explanation_or_error)
                     
                     new_image_explanations.append(explanation_or_error)
-                    time.sleep(1) # Pause for 1 second to avoid hitting API rate limits or overwhelming the image server
+                    time.sleep(1)
                 
-                # Replace the original list of image URLs with the new list of explanations
                 post_json['image_url'] = new_image_explanations
             processed_inner_list.append(post_json)
         processed_posts_data.append(processed_inner_list)
@@ -176,7 +152,6 @@ def process_image_urls_in_posts(posts_data):
     print(f"Total image URLs successfully processed and explained: {total_image_urls_processed}")
     return processed_posts_data
 
-# --- Main Execution Block ---
 if __name__ == "__main__":
     print(f"Attempting to load data from '{INPUT_FILENAME}'...")
     try:
