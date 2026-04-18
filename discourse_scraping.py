@@ -4,7 +4,6 @@ import os
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 
-# Configuration
 DISCOURSE_URL = "https://discourse.onlinedegree.iitm.ac.in"
 CATEGORY_ID = 34  # TDS-KB
 RAW_OUTPUT_FILE = "raw_topic_posts.json"
@@ -12,7 +11,6 @@ PROCESSED_OUTPUT_FILE = "processed_posts.json"
 START_DATE = datetime(2025, 1, 1, tzinfo=timezone.utc)
 END_DATE = datetime(2025, 5, 31, 23, 59, 59, 999999, tzinfo=timezone.utc)
 
-# Cookies extracted from browser
 browser_cookies = {
     "_t": "iIu8AfQwWMR4BLZHQiM8XqsKZQsuLPKVY8gwSLbg87t0AyZCf1qQwUEjYctAzFIxtlUFWsbZ5xH6INb%2BXvVD685h%2F9ZKZhilSy9iaAd%2F07ezSbUicGqv8Nfo4pO8RnX9i24%2ByHxx1VKS1YGiKk%2BEv%2BBtz367qKpX%2FBt5O47vIlGODgdg5BnGFogfuFoVi%2FlK539xLsYQwTzOLxguzoWOupAw%2F2mjYUmSZu5nJv%2BD%2FCYiDOyczhLlt7UgeiFEX%2FbIGgaYpz%2FvIbIIP%2BQpJUTuoJdot3vi6O14nILxUHmgImsYnDjO2xCLCMxqq7slDqC6--P%2BqGtbkbbok5JvW5--p%2BHY1mNEVTc%2BZ3wKza5Pvg%3D%3D",
     "_forum_session": "7SLVk4lcOqoQN%2BJk3HsGwWlKHfqTkSBoRJIJX84xqwg39Rd9xTCzQyvhAfi%2FBAPzcdFCiFOx7v2t8Pzm%2FUU89uCgNXeYOa2%2BX1UtDoRmxiVC%2Fm1W5B0yxQZrqd59cIZz%2FUDtxNFXPQrwxpXB99AwLKfF1jKNGGyoH0nQW8UL3VpESD6Cd3f6AIl8z%2FGKtyr0h2zVBUEUjzU%2BlPMpciWVZKeYoVgewE%2Begg%2FSSc1TlYeRUyKi1hqJqlR6XW4OihsyCTXqtqq08r9XqmWFSlaOg9uj8RGPXzRti2rwiuuK74mvPGERPAcAcPUcFlS30aHhkY4K%2F2ha%2B14zxgRQumrfLxzGBFlU1EkAWT5s%2F1AdU1Cati9UtdJ4PoeyTOpbqUmSBuup9ygmLB3TQuXYGWA%2BeCaER1BDsf2spZcT26yWmSVD%2FUnLZdA2wL1PxsPPWLhLC5UuUcrmW19GdCqS6bvKD5PvGSdHvZnvFwpeNeh7JMWxaOBprjEEzRMxb%2B7sog%3D%3D--HcKLH64V31Sfwm40--vPCumtdgFPuh%2BV4b6fGhKQ%3D%3D"
@@ -75,7 +73,6 @@ def fetch_topic_ids(session):
                     print(f"Skipped topic ID {topic_id}: {created_at_str} outside date range")
             
             page += 1
-            # Avoid rate limits
             time.sleep(0.5)
         
         except requests.RequestException as e:
@@ -134,10 +131,7 @@ def process_posts(topic_jsons):
     return processed_posts
 
 def main():
-    # Create authenticated session
     session = create_session_with_browser_cookies(DISCOURSE_URL, browser_cookies)
-    
-    # Verify authentication
     try:
         response = session.get(f"{DISCOURSE_URL}/session/current.json")
         response.raise_for_status()
@@ -147,7 +141,6 @@ def main():
         print(f"Authentication failed: {e}")
         return
     
-    # Fetch topic IDs
     print("Fetching topic IDs from category 34...")
     topic_ids = fetch_topic_ids(session)
     
@@ -156,8 +149,7 @@ def main():
         return
     
     print(f"Retrieved {len(topic_ids)} topic IDs.")
-    
-    # Fetch and process posts
+
     all_raw_jsons = []
     all_processed_posts = []
     
@@ -171,16 +163,14 @@ def main():
         all_raw_jsons.extend(topic_jsons)
         processed_posts = process_posts(topic_jsons)
         all_processed_posts.extend(processed_posts)
-    
-    # Save raw JSONs
+
     try:
         with open(RAW_OUTPUT_FILE, "w", encoding="utf-8") as f:
             json.dump(all_raw_jsons, f, indent=2, ensure_ascii=False)
         print(f"Saved raw JSONs to {RAW_OUTPUT_FILE}")
     except Exception as e:
         print(f"Error saving raw JSONs: {e}")
-    
-    # Save processed posts
+
     try:
         with open(PROCESSED_OUTPUT_FILE, "w", encoding="utf-8") as f:
             json.dump(all_processed_posts, f, indent=2, ensure_ascii=False)
