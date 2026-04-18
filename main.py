@@ -4,23 +4,15 @@ import httpx
 import base64
 import json
 from io import BytesIO
-# Removed: from PIL import Image # Pillow library no longer used for image validation in this version
-# Removed: from dotenv import load_dotenv # python-dotenv no longer used for local env loading
-
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, HttpUrl
 import time
 import traceback # Import for full traceback in logging
 
-# Load environment variables (Note: load_dotenv() call is removed here,
-# as Vercel natively provides these and for local dev you'd set them in your shell
-# or use a dedicated local setup without python-dotenv for this version.)
-# It's assumed OPENAI_API_KEY and GOOGLE_API_KEY will be set in Vercel's dashboard.
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# --- Configuration ---
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIMENSIONS = 1536
 
@@ -30,12 +22,9 @@ GEMINI_VISION_MODEL = "gemini-2.0-flash"
 AI_PROXY_OPENAI_BASE_URL = "https://aiproxy.sanand.workers.dev/openai/v1"
 GOOGLE_GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
-# --- KNOWLEDGE BASE PATH (GLOBAL VARIABLE) ---
-# This assumes course_with_id.npz is in the same directory as main.py (inside 'api/')
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 KNOWLEDGE_BASE_NPZ_PATH = os.path.join(current_script_dir, 'course_with_id.npz')
 
-# Retrieval Parameters
 NUM_SIMILAR_CHUNKS = 5
 
 app = FastAPI(
@@ -69,9 +58,7 @@ async def load_knowledge_base():
     print(f"DEBUG: Calculated KNOWLEDGE_BASE_NPZ_PATH: '{KNOWLEDGE_BASE_NPZ_PATH}'")
 
     try:
-        # Check if the file exists at the calculated path
         if not os.path.exists(KNOWLEDGE_BASE_NPZ_PATH):
-            # If not found, log extensive debugging information
             current_working_dir = os.getcwd()
             
             try:
@@ -92,11 +79,9 @@ async def load_knowledge_base():
             
             raise FileNotFoundError(f"Knowledge base file not found at: {KNOWLEDGE_BASE_NPZ_PATH}. Check logs for details.")
 
-        # If file exists, attempt to load it with numpy
         print(f"DEBUG: File '{KNOWLEDGE_BASE_NPZ_PATH}' found. Attempting to load with numpy.")
         npz_data = np.load(KNOWLEDGE_BASE_NPZ_PATH, allow_pickle=True)
         
-        # Verify expected keys are present
         if 'chunk_url_keys' not in npz_data:
             raise ValueError(f"'{KNOWLEDGE_BASE_NPZ_PATH}' missing 'chunk_url_keys' array.")
         if 'embeddings' not in npz_data:
@@ -125,8 +110,6 @@ async def load_knowledge_base():
         
         raise HTTPException(status_code=500, detail=f"Knowledge base loading failed: {type(e).__name__}: {e}. Check server logs for full details.")
 
-
-# --- Pydantic Models for API Request/Response (Unchanged) ---
 class QueryRequest(BaseModel):
     question: str
     image: str | None = Field(
@@ -142,8 +125,6 @@ class APIResponse(BaseModel):
     answer: str
     links: list[Link]
 
-
-# --- Helper Function for Cosine Similarity (Custom NumPy Implementation - Unchanged) ---
 def calculate_cosine_similarity(vec1: np.ndarray, vec2_matrix: np.ndarray) -> np.ndarray:
     vec1 = vec1.reshape(1, -1)
     dot_product = np.dot(vec1, vec2_matrix.T)
@@ -154,12 +135,9 @@ def calculate_cosine_similarity(vec1: np.ndarray, vec2_matrix: np.ndarray) -> np
     similarities = dot_product / denominators
     return similarities.flatten()
 
-
-# --- Helper Functions for API Calls (get_gemini_image_description adjusted) ---
 async def get_gemini_image_description(image_base64: str) -> str:
     """
     Sends a base64-encoded image to Google Gemini Vision model for description.
-    Removed PIL.Image validation as Pillow is no longer a dependency.
     """
     if not GOOGLE_API_KEY:
         raise HTTPException(status_code=500, detail="Google API Key is not configured.")
@@ -168,7 +146,6 @@ async def get_gemini_image_description(image_base64: str) -> str:
     headers = {"Content-Type": "application/json"}
 
     try:
-        # Determine MIME type from data URI prefix if present
         if "," in image_base64:
             mime_part = image_base64.split(',')[0]
             if 'image/webp' in mime_part:
@@ -183,13 +160,9 @@ async def get_gemini_image_description(image_base64: str) -> str:
         else:
             mime_type = 'application/octet-stream' # Default if no prefix
             base64_data = image_base64
-
-        # Removed: Image.open(BytesIO(base64.b64decode(base64_data))) # No longer using Pillow for validation
         
     except Exception as e:
-        # This catch block might now only catch base64 decode errors, not image format errors
         print(f"Warning: Could not process/decode base64 string for image. Error: {e}")
-        # Proceeding with generic mime_type and base64_data, API might still reject.
         mime_type = 'application/octet-stream'
         base64_data = image_base64
 
@@ -299,8 +272,6 @@ async def get_gpt4o_mini_response(prompt_messages: list[dict]) -> str:
         print(f"An unexpected error occurred with GPT-4o-mini: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected error during GPT-4o-mini call: {e}")
 
-
-# --- API Endpoint ---
 @app.post("/", response_model=APIResponse)
 async def ask_question(request_data: QueryRequest):
     if course_embeddings is None:
@@ -312,7 +283,6 @@ async def ask_question(request_data: QueryRequest):
     image_description = ""
     combined_query_text = user_question
 
-    # 1. Process Image if present
     if request_data.image:
         print("Image detected. Generating description with Gemini...")
         try:
@@ -328,7 +298,6 @@ async def ask_question(request_data: QueryRequest):
             image_description = ""
             combined_query_text = user_question
 
-    # 2. Generate Embedding for combined query text
     print(f"Generating embedding for query: '{combined_query_text[:100]}...'")
     query_embedding_list = await get_openai_embedding(
         text=combined_query_text,
@@ -336,8 +305,6 @@ async def ask_question(request_data: QueryRequest):
         dimensions=EMBEDDING_DIMENSIONS
     )
     query_embedding_np = np.array(query_embedding_list).reshape(1, -1)
-
-    # 3. Retrieve Most Similar Chunks
     if course_embeddings.shape[0] == 0:
         raise HTTPException(status_code=500, detail="Knowledge base embeddings are empty. Cannot perform search.")
 
@@ -347,10 +314,8 @@ async def ask_question(request_data: QueryRequest):
     sorted_indices = similarities.argsort()[::-1]
     top_n_indices = sorted_indices[:NUM_SIMILAR_CHUNKS]
 
-    # Retrieve (chunk_text, url) tuples for the top N chunks
     retrieved_chunk_url_pairs = [course_chunk_url_keys[i] for i in top_n_indices]
 
-    # 4. Prepare Link for the response (ONLY THE MOST SIMILAR ONE)
     response_links = []
     if retrieved_chunk_url_pairs:
         most_similar_chunk_text, most_similar_chunk_url = retrieved_chunk_url_pairs[0]
@@ -363,8 +328,6 @@ async def ask_question(request_data: QueryRequest):
     else:
         print("No chunks retrieved, links array will be empty.")
 
-
-    # 5. Construct Prompt for GPT-4o-mini
     context_string = "\n\n".join([
         f"Context Document {idx+1}: {chunk_text}"
         for idx, (chunk_text, url) in enumerate(retrieved_chunk_url_pairs)
@@ -395,16 +358,13 @@ async def ask_question(request_data: QueryRequest):
         {"role": "user", "content": user_message_content}
     ]
 
-    # 6. Call GPT-4o-mini
     print("Calling GPT-4o-mini for answer generation...")
     answer = await get_gpt4o_mini_response(prompt_messages)
     print(f"Generated answer: {answer[:150]}...")
 
-    # 7. Return Response
     print("Returning API response.")
     return APIResponse(answer=answer, links=response_links)
 
-# --- Shutdown Event ---
 @app.on_event("shutdown")
 async def shutdown_event():
     """Closes HTTPX clients gracefully on shutdown."""
